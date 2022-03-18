@@ -1,2 +1,4 @@
 ds-test/=lib/ds-test/src/
 forge-std/=lib/forge-std/src/
+openzeppelin-contracts/=lib/openzeppelin-contracts/
+v2-core/=lib/v2-core/contracts/
