@@ -13,3 +13,6 @@
 [submodule "lib/nftx-protocol-v2"]
 	path = lib/nftx-protocol-v2
 	url = https://github.com/NFTX-project/nftx-protocol-v2
+[submodule "lib/v2-periphery"]
+	path = lib/v2-periphery
+	url = https://github.com/Uniswap/v2-periphery
