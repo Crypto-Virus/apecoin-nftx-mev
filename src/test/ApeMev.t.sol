@@ -29,6 +29,12 @@ contract ApeMevTest is BaseTest {
 
         apeMev.start();
 
+        console.log("My balances after mev");
+        console.log("ETH", address(this).balance);
+        console.log("WETH", IERC20(WETH).balanceOf(address(this)));
+        console.log("APECOIN", IERC20(APECOIN).balanceOf(address(this)));
+        console.log("BAYC_NFTX_VAULT_ERC20", IERC20(BAYC_NFTX_VAULT).balanceOf(address(this)));
+
 
     }
 }
