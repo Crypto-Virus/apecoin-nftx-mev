@@ -52,6 +52,7 @@ contract ApeMev is Ownable, IERC3156FlashBorrowerUpgradeable, IERC721Receiver {
     function start() external onlyOwner {
         console.log("Starting MEV");
         getLoan();
+        withdrawTokens();
     }
 
     function getLoan() internal {
@@ -162,6 +163,12 @@ contract ApeMev is Ownable, IERC3156FlashBorrowerUpgradeable, IERC721Receiver {
         console.log("Finished swap");
 
         // flashloan will automatically get paid back
+    }
+
+    function withdrawTokens() public onlyOwner {
+        IERC20(WETH).transfer(owner(), IERC20(WETH).balanceOf(address(this)));
+        IERC20(BAYC_NTFX_ERC20_ADDRESS).transfer(owner(), IERC20(BAYC_NTFX_ERC20_ADDRESS).balanceOf(address(this)));
+        IERC20(APECOIN).transfer(owner(), IERC20(APECOIN).balanceOf(address(this)));
     }
 
 
