@@ -8,6 +8,7 @@ import "../ApeMev.sol";
 contract ApeMevTest is BaseTest {
 
     function setUp() public {
+        vm.label(0xEA47B64e1BFCCb773A0420247C0aa0a3C1D2E5C5, "BAYC_NFTX_VAULT");
     }
 
     function test_ApeMev() public {
@@ -15,12 +16,8 @@ contract ApeMevTest is BaseTest {
         ApeMev apeMev = new ApeMev();
         console.log("Finished creating ApeMev contract");
 
-        console.log("giving eth");
-        vm.deal(address(apeMev), 1 ether);
-        vm.deal(msg.sender, 10 ether);
+        vm.deal(address(apeMev), 1000 ether);
 
-        console.log("balance", msg.sender.balance);
-        console.log("balance mev", address(apeMev).balance);
 
         apeMev.start();
 
