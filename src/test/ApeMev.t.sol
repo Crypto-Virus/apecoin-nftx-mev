@@ -11,12 +11,14 @@ contract ApeMevTest is BaseTest {
     address private constant APECOIN = 0x4d224452801ACEd8B2F0aebE155379bb5D594381;
     address private constant BAYC_NFTX_VAULT = 0xEA47B64e1BFCCb773A0420247C0aa0a3C1D2E5C5;
     address private constant BAYC_ERC721 = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
+    address private constant AIRDROP = 0x025C6da5BD0e6A5dd1350fda9e3B6a614B205a1F;
 
     function setUp() public {
         vm.label(WETH, "WETH");
         vm.label(APECOIN, "APECOIN");
         vm.label(BAYC_NFTX_VAULT, "BAYC_NFTX_VAULT");
         vm.label(BAYC_ERC721, "BAYC_ERC721");
+        vm.label(AIRDROP, "AIRDROP");
     }
 
     function test_ApeMev() public {
