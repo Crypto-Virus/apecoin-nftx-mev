@@ -20,15 +20,16 @@ contract ApeMevTest is BaseTest {
     }
 
     function test_ApeMev() public {
-        console.log("Create ApeMev contract");
+        // Create Contract that will execute MEV
         ApeMev apeMev = new ApeMev();
-        console.log("Finished creating ApeMev contract");
 
+        // Give Contract 1000 ether
         vm.deal(address(apeMev), 1000 ether);
 
-
+        // Start MEV
         apeMev.start();
 
+        // Print Balances
         console.log("My balances after mev");
         console.log("ETH", address(this).balance);
         console.log("WETH", IERC20(WETH).balanceOf(address(this)));
