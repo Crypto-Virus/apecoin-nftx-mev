@@ -3,9 +3,6 @@ pragma solidity 0.8.10;
 
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 import "openzeppelin-contracts/contracts/interfaces/IERC20.sol";
-import "v2-core/interfaces/IUniswapV2Factory.sol";
-import "v2-core/interfaces/IUniswapV2Pair.sol";
-import "v2-core/interfaces/IUniswapV2Callee.sol";
 import "v2-periphery/interfaces/IUniswapV2Router01.sol";
 import "nftx-protocol-v2/solidity/interface/IERC3156Upgradeable.sol";
 import "nftx-protocol-v2/solidity/NFTXVaultUpgradeable.sol";
@@ -42,9 +39,7 @@ contract ApeMev is Ownable, IERC3156FlashBorrowerUpgradeable, IERC721Receiver {
 
     AirdropContract private constant AIRDROP = AirdropContract(0x025C6da5BD0e6A5dd1350fda9e3B6a614B205a1F);
 
-    IUniswapV2Factory private constant SUSHI_FACTORY = IUniswapV2Factory(0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac);
     IUniswapV2Router01 private constant SUSHI_ROUTER = IUniswapV2Router01(0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F);
-
 
     uint256[] private nftTokenIds;
     uint256 private loanAmount;
