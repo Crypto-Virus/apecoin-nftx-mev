@@ -9,8 +9,8 @@ import "v2-core/interfaces/IUniswapV2Callee.sol";
 
 import { console } from "./test/utils/console.sol";
 
-interface INFTX {
-    function redeem(uint256 vaultId, uint256 numNFTs) external payable;
+interface INFTXVault {
+    function redeem(uint256 amount, uint256[] calldata specificIds) external returns (uint256[] calldata);
 }
 
 interface AirdropContract {
@@ -30,7 +30,7 @@ contract ApeMev is Ownable, IUniswapV2Callee {
     uint256 private constant NFTX_BAYC_VAULT_ID = 2;
 
     IUniswapV2Factory private constant SUSHI_FACTORY = IUniswapV2Factory(0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac);
-    INFTX private constant NFTX = INFTX(0xAf93fCce0548D3124A5fC3045adAf1ddE4e8Bf7e);
+    INFTXVault private constant INFTX_Vault = INFTXVault(0x3451b4c5395B3fE06aA629af73207cfaA28131D1);
     IERC20 private constant BAYC_VAULT_TOKEN = IERC20(BAYC_NTFX_ERC20_ADDRESS);
 
 
@@ -44,15 +44,18 @@ contract ApeMev is Ownable, IUniswapV2Callee {
 
     function getLoan() internal {
         console.log("Requesting flash swap");
-        uint256 amount = 6;
+        uint256 amount = 1 ether;
 
         // get pair
         address pairAddr = SUSHI_FACTORY.getPair(BAYC_NTFX_ERC20_ADDRESS, WETH);
         require(pairAddr != address(0), "!pair");
 
         IUniswapV2Pair pair = IUniswapV2Pair(pairAddr);
+        (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast) = pair.getReserves();
+        console.log("reserves", reserve0, reserve1);
         address token0 = pair.token0();
         address token1 = pair.token1();
+        console.log("tokens", token0, token1);
         uint256 amount0Out = BAYC_NTFX_ERC20_ADDRESS == token0 ? amount : 0;
         uint256 amount1Out = BAYC_NTFX_ERC20_ADDRESS == token1 ? amount : 0;
 
@@ -86,16 +89,21 @@ contract ApeMev is Ownable, IUniswapV2Callee {
     }
 
     function SwapForApe() internal {
-        console.log("Swapping bayc tokens for apes");
+        console.log("Swapping bayc tokens for nfts");
         uint256 amount = 5; // todo: calcualte amount somehow
+        uint256[] memory specifiedIds = new uint[](0);
 
-        BAYC_VAULT_TOKEN.approve(address(NFTX), type(uint256).max);
-        NFTX.redeem(NFTX_BAYC_VAULT_ID, amount);
+        BAYC_VAULT_TOKEN.approve(address(INFTX_Vault), type(uint256).max);
+        console.log("Redeeming");
+        INFTX_Vault.redeem(amount, specifiedIds);
+
+        claimTokens();
     }
 
     function claimTokens() internal {
         console.log("Claiming airdrop");
-        // AIRDROP.claimTokens();
+        AIRDROP.claimTokens();
+
     }
 
     function repayLoan(address pair, uint256 repayAmount) internal {
